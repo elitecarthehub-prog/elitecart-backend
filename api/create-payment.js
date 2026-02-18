@@ -3,6 +3,16 @@ import clientPromise from "../lib/db.js";
 
 export default async function handler(req, res) {
 
+  // 🔥 CORS HEADERS
+  res.setHeader("Access-Control-Allow-Origin", "https://elitecart.pro");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // Handle preflight request
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   if (req.method !== "POST") {
     return res.status(405).send("Method Not Allowed");
   }
@@ -25,7 +35,6 @@ export default async function handler(req, res) {
     .update(hashString)
     .digest("hex");
 
-  // Save order as pending
   const client = await clientPromise;
   const db = client.db("elitecart");
 
@@ -50,8 +59,8 @@ export default async function handler(req, res) {
       <input type="hidden" name="firstname" value="${name}" />
       <input type="hidden" name="email" value="${email}" />
       <input type="hidden" name="phone" value="${phone}" />
-      <input type="hidden" name="surl" value="https://YOUR-VERCEL-URL.vercel.app/api/success" />
-      <input type="hidden" name="furl" value="https://YOUR-VERCEL-URL.vercel.app/payment-failed.html" />
+      <input type="hidden" name="surl" value="https://elitecart-backend.vercel.app/api/success" />
+      <input type="hidden" name="furl" value="https://elitecart.pro/payment-failed.html" />
       <input type="hidden" name="hash" value="${hash}" />
     </form>
   </body>
