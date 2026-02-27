@@ -1,55 +1,90 @@
 import crypto from "crypto";
 import clientPromise from "../lib/db.js";
 
+export const config = {
+  api: {
+    bodyParser: true,
+  },
+};
+
 export default async function handler(req, res) {
 
-  const salt = process.env.PAYU_SALT;
+  try {
 
-  const {
-    status,
-    firstname,
-    amount,
-    txnid,
-    key,
-    productinfo,
-    email,
-    hash
-  } = req.body;
+    if (req.method !== "POST") {
+      return res.status(405).send("Method Not Allowed");
+    }
 
-  const hashString =
-    salt +
-    "|" +
-    status +
-    "|||||||||||" +
-    email +
-    "|" +
-    firstname +
-    "|" +
-    productinfo +
-    "|" +
-    amount +
-    "|" +
-    txnid +
-    "|" +
-    key;
+    const body = req.body || {};
 
-  const generatedHash = crypto
-    .createHash("sha512")
-    .update(hashString)
-    .digest("hex");
+    const {
+      status,
+      firstname,
+      amount,
+      txnid,
+      key,
+      productinfo,
+      email,
+      hash
+    } = body;
 
-  if (generatedHash === hash && status === "success") {
+    if (!status || !txnid) {
+      return res.status(400).send("Invalid PayU response");
+    }
 
-    const client = await clientPromise;
-    const db = client.db("elitecart");
+    const salt = process.env.PAYU_SALT;
+    if (!salt) {
+      return res.status(500).send("PAYU_SALT missing");
+    }
 
-    await db.collection("orders").updateOne(
-      { txnid },
-      { $set: { status: "paid", paidAt: new Date() } }
+    const hashString =
+      salt +
+      "|" +
+      status +
+      "|||||||||||" +
+      email +
+      "|" +
+      firstname +
+      "|" +
+      productinfo +
+      "|" +
+      amount +
+      "|" +
+      txnid +
+      "|" +
+      key;
+
+    const generatedHash = crypto
+      .createHash("sha512")
+      .update(hashString)
+      .digest("hex");
+
+    if (generatedHash === hash && status === "success") {
+
+      const client = await clientPromise;
+      const db = client.db("elitecart");
+
+      await db.collection("orders").updateOne(
+        { txnid },
+        { $set: { status: "paid", paidAt: new Date() } }
+      );
+
+      return res.redirect(
+        302,
+        "https://elitecart.pro/checkout.html?status=success"
+      );
+    }
+
+    return res.redirect(
+      302,
+      "https://elitecart.pro/checkout.html?status=failure"
     );
 
-    return res.redirect("https://yourgithubusername.github.io/thankyou.html");
+  } catch (err) {
+    console.error("SUCCESS API ERROR:", err);
+    return res.redirect(
+      302,
+      "https://elitecart.pro/checkout.html?status=failure"
+    );
   }
-
-  return res.redirect("https://yourgithubusername.github.io/payment-failed.html");
 }
