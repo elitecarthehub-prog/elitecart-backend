@@ -52,17 +52,19 @@ export default async function handler(req, res) {
   <html>
   <body onload="document.forms[0].submit()">
     <form method="post" action="https://secure.payu.in/_payment">
-      <input type="hidden" name="key" value="${key}" />
-      <input type="hidden" name="txnid" value="${txnid}" />
-      <input type="hidden" name="amount" value="${amount}" />
-      <input type="hidden" name="productinfo" value="${productinfo}" />
-      <input type="hidden" name="firstname" value="${name}" />
-      <input type="hidden" name="email" value="${email}" />
-      <input type="hidden" name="phone" value="${phone}" />
-      <input type="hidden" name="surl" value="https://elitecart-backend.vercel.app/api/success" />
-      <input type="hidden" name="furl" value="https://elitecart.pro/payment-failed.html" />
-      <input type="hidden" name="hash" value="${hash}" />
-    </form>
+  <input type="hidden" name="key" value="${key}" />
+  <input type="hidden" name="txnid" value="${txnid}" />
+  <input type="hidden" name="amount" value="${amount}" />
+  <input type="hidden" name="productinfo" value="${productinfo}" />
+  <input type="hidden" name="firstname" value="${name}" />
+  <input type="hidden" name="email" value="${email}" />
+  <input type="hidden" name="phone" value="${phone}" />
+  <input type="hidden" name="pg" value="UPI" />
+  <input type="hidden" name="bankcode" value="UPI" />
+  <input type="hidden" name="surl" value="https://elitecart-backend.vercel.app/api/success" />
+  <input type="hidden" name="furl" value="https://elitecart.pro/payment-failed.html" />
+  <input type="hidden" name="hash" value="${hash}" />
+</form>
   </body>
   </html>
   `;
